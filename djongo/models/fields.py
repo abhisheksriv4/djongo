@@ -151,20 +151,12 @@ class ModelField(MongoField):
                                 value: dict,
                                 *other_args):
         processed_value = {}
-        errors = {}
         for field in self.model_container._meta.get_fields():
             try:
-                try:
-                    field_value = value[field.attname]
-                except KeyError:
-                    raise ValidationError(f'Value for field "{field}" not supplied')
-                processed_value[field.attname] = getattr(field, func_name)(field_value, *other_args)
-            except ValidationError as e:
-                errors[field.name] = e.error_list
-
-        if errors:
-            e = ValidationError(errors)
-            raise ValidationError(str(e))
+                field_value = value[field.attname]
+            except KeyError:
+                continue
+            processed_value[field.attname] = getattr(field, func_name)(field_value, *other_args)
 
         return processed_value
 
